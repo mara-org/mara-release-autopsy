@@ -10,9 +10,9 @@ No account. No cloud upload. No telemetry. No LLM. No source-code reading.
 
 ## Demo
 
-[![Mara Release Autopsy demo](media/mara-release-autopsy-poster.png)](media/mara-release-autopsy-x-linkedin.mp4)
+![Mara Release Autopsy demo](media/mara-release-autopsy-demo.gif)
 
-Click the preview to watch the 15-second demo.
+[Watch the full-quality 15-second MP4](media/mara-release-autopsy-x-linkedin.mp4).
 
 ## Install
 
