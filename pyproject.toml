@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mara-release-autopsy"
+version = "0.1.0"
+description = "A local CLI that compares Apple Health history with Git release windows."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Mara Devs" }]
+keywords = ["apple-health", "git", "developer-health", "privacy", "cli"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.scripts]
+mara-autopsy = "mara_autopsy.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.9,<1"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mara_autopsy"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

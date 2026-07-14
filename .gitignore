@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+build/
+dist/
+*.egg-info/
+.DS_Store
+
+# Real exports and generated reports are private by default.
+export.zip
+export.xml
+apple_health_export/
+autopsy-report.*
+
+# Interrupted video renders.
+media/.*.silent.mp4
+media/.*.wav
