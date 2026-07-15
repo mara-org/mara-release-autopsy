@@ -5,12 +5,14 @@ from __future__ import annotations
 import math
 import os
 import re
+import signal
 import subprocess
 import threading
 import time
 import unicodedata
 from collections import deque
 from collections.abc import Iterable
+from contextlib import suppress
 from datetime import date, datetime
 from pathlib import Path
 from typing import IO
@@ -206,6 +208,10 @@ def _run_git_command(command: list[str], repository: Path, *, timeout_seconds: f
             stderr=subprocess.PIPE,
             env=_git_environment(),
             close_fds=True,
+            # Git can launch helpers that inherit its output pipes. A dedicated
+            # process group lets timeout and output-limit handling stop the
+            # complete tree instead of leaving a child holding a pipe open.
+            start_new_session=os.name != "nt",
         )
     except FileNotFoundError as exc:
         raise GitReadError("Git executable was not found") from exc
@@ -325,17 +331,32 @@ def _read_stream_limited(
 
 
 def _stop_process(process: subprocess.Popen[bytes]) -> None:
-    if process.poll() is not None:
-        return
-    try:
-        process.terminate()
-        process.wait(timeout=0.25)
-    except (OSError, subprocess.TimeoutExpired):
+    if os.name != "nt":
         try:
-            process.kill()
-            process.wait(timeout=1.0)
-        except (OSError, subprocess.TimeoutExpired):
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
             pass
+        except OSError:
+            # Fall back to stopping the direct process below.
+            with suppress(OSError):
+                process.terminate()
+    elif process.poll() is None:
+        with suppress(OSError):
+            process.terminate()
+
+    try:
+        process.wait(timeout=0.25)
+    except subprocess.TimeoutExpired:
+        if os.name != "nt":
+            with suppress(ProcessLookupError, OSError):
+                os.killpg(process.pid, signal.SIGKILL)
+        else:
+            with suppress(OSError):
+                process.kill()
+        with suppress(OSError, subprocess.TimeoutExpired):
+            process.wait(timeout=1.0)
+    except OSError:
+        pass
 
 
 def _parse_tag_output(output: bytes, repository: Path) -> tuple[ReleaseEvent, ...]:
